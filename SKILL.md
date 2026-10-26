@@ -18,7 +18,7 @@ Parler à l'utilisateur dans sa langue (français par défaut). Faire les vérif
 **0.1 Session déjà activée ?** Si `~/.aid/check.sh` existe, lancer `bash ~/.aid/check.sh`. Réponse `{"ok":true}` → passer à 0.5.
 
 **0.2 Serveur joignable ?** `curl -sS -m 15 -o /dev/null -w "%{http_code}" https://aid-licence.m-zakariarahmouni.workers.dev/api/ping`. Si le code n'est pas 200 (« CONNECT tunnel failed 403 » ou 000), envoyer ce message et attendre :
-> Pour utiliser le skill, Claude doit pouvoir joindre le serveur d'activation et les outils de voix. Sur claude.ai dans un navigateur : **Settings > Capabilities** (en français : **Paramètres > Capacités**, section exécution de code, domaines autorisés), ajoute ces domaines à la liste autorisée puis enregistre : `aid-licence.m-zakariarahmouni.workers.dev`, `storage.googleapis.com`, `api.elevenlabs.io`. Il faut un abonnement Claude payant (Pro ou Max) ; sur Team ou Enterprise, demande-le à ton administrateur. Réponds « c'est fait » ensuite.
+> Pour utiliser le skill, Claude doit pouvoir joindre le serveur d'activation et les outils de voix. Sur claude.ai dans un navigateur : **Settings > Capabilities** (en français : **Paramètres > Capacités**, section exécution de code, domaines autorisés), ajoute ces domaines à la liste autorisée puis enregistre : `aid-licence.m-zakariarahmouni.workers.dev`, `storage.googleapis.com`, `api.elevenlabs.io`. Sur Team ou Enterprise, c'est ton administrateur qui le fait. Réponds « c'est fait » ensuite.
 
 **0.3 Demander le code.** Message unique : « Voici le manuel d'usage. Entre ton code d'activation IA Debate (format AID-XXXX-XXXX-XXXX) : il active le skill pour cette conversation uniquement. » Attendre la réponse. Ne jamais afficher le code en entier dans les messages suivants.
 
