@@ -5,7 +5,7 @@ description: "IA Debate : émission de débat télévisée jouée par des agents
 
 # IA Debate — skill sous licence
 
-Version du skill : **1.8**
+Version du skill : **1.9**
 
 Le skill **IA Debate** produit des capsules de l'émission « AI Intelligent Debate » (débat télévisé joué par des agents IA, en darija marocaine). La procédure complète et le kit ne sont pas dans ce fichier : ils sont servis après activation.
 
@@ -84,7 +84,7 @@ cd ~/aid && rm -rf _kit && mkdir _kit && curl -sS -m 120 -f -H "authorization: B
 
 ## Étape 3 — Procédure
 
-`~/aid/_kit/skill/PROCEDURE.md` est le fichier de référence : le lire en entier avec Read à chaque appel, puis appliquer ses phases A à G dans l'ordre. Le kit est déjà récupéré : ignorer toute consigne qui redemanderait un code. Pour les voix, utiliser **M6** (connexion) et **M9** (récupération).
+`~/aid/_kit/skill/PROCEDURE.md` est le fichier de référence : le lire en entier avec Read à chaque appel, puis **suivre ses points d'entrée** selon le message de l'utilisateur — par défaut une nouvelle capsule (phases A à G), ou le **Module Tendances** si le message est « search » / « tendances », ou le **Module Duplicate** si c'est « duplicate <lien> ». Appliquer aussi sa règle d'économie de tokens. Le kit est déjà récupéré : ignorer toute consigne qui redemanderait un code. Pour les voix, utiliser **M6** (connexion) et **M9** (récupération).
 
 ## Messages à l'utilisateur
 
@@ -107,7 +107,7 @@ cd ~/aid && rm -rf _kit && mkdir _kit && curl -sS -m 120 -f -H "authorization: B
 > - **La durée de ton choix** : jusqu'à 3 minutes, tout se fait avec des outils gratuits.
 > - **Des mises à jour automatiques**, sans rien réinstaller.
 >
-> Dis-moi le sujet du débat et la durée souhaitée.
+> Dis-moi le sujet du débat et la durée souhaitée — ou tape **search** pour trouver des tendances, ou **duplicate <lien>** pour t'inspirer d'une vidéo virale.
 
 **M4 — Activation dans le navigateur (mode compatible)**
 > Pour activer IA Debate, ouvre ce lien dans ton navigateur : <lien>
