@@ -5,7 +5,7 @@ description: "IA Debate : émission de débat télévisée jouée par des agents
 
 # IA Debate — skill sous licence
 
-Version du skill : **1.5**
+Version du skill : **1.6**
 
 Le skill **IA Debate** produit des capsules de l'émission « AI Intelligent Debate » (débat télévisé joué par des agents IA, en darija marocaine). La procédure complète et le kit ne sont pas dans ce fichier : ils sont servis par le serveur d'activation, uniquement à une session Claude activée.
 
@@ -41,12 +41,11 @@ PY
 - `ACTIVE` → aller à l'étape 2 sans rien demander.
 - `CODE_REQUIS: session jamais activée` → 1.2 (envoyer le manuel), puis 1.3.
 - `CODE_REQUIS: code désactivé` ou `code expiré` → dire en une phrase que l'activation de cette session a été désactivée par l'éditeur, puis 1.3 (nouveau code).
-- `RESEAU` (« CONNECT tunnel failed 403 », délai dépassé) → envoyer ce message et attendre :
-> Pour utiliser le skill, Claude doit pouvoir joindre le serveur d'activation et les outils de voix. Sur claude.ai dans un navigateur : **Paramètres > Capacités** (en anglais : Settings > Capabilities), section exécution de code, domaines autorisés : ajoute `aid-licence.m-zakariarahmouni.workers.dev`, `storage.googleapis.com` et `api.elevenlabs.io`, puis enregistre. Sur Team ou Enterprise, c'est ton administrateur qui le fait. Réponds « c'est fait » ensuite.
+- `RESEAU` (« CONNECT tunnel failed 403 », délai dépassé) → **mode compatible (1.4)**, sans rien demander et sans parler d'abonnement : ce mode fonctionne avec tous les comptes Claude.
 
 **1.2 Manuel d'usage** (première activation seulement, une fois par conversation). Envoyer `IA_Debate_Manuel.pdf` avec `SendUserFile` (display attach), légende « Manuel d'usage IA Debate ». Le fichier est dans le dossier de ce skill ; sinon : `curl -fsSL https://raw.githubusercontent.com/mzakariarahmouni-web/ia-debate/main/IA_Debate_Manuel.pdf -o ~/aid/IA_Debate_Manuel.pdf`.
 
-**1.3 Demander le code** (uniquement dans les cas prévus en 1.1). Message unique : « Entre ton code d'activation IA Debate (format AID-XXXX-XXXX-XXXX) : il active le skill pour cette conversation, une seule fois. » Puis, en remplaçant `<CODE>` :
+**1.3 Demander le code** (uniquement dans les cas prévus en 1.1 ou 1.4). Message unique : « Entre ton code d'activation IA Debate (format AID-XXXX-XXXX-XXXX) : il active le skill pour cette conversation, une seule fois. » Puis, en remplaçant `<CODE>` :
 ```bash
 AID=https://aid-licence.m-zakariarahmouni.workers.dev; SID=$(cat ~/.aid/sid)
 curl -sS -m 30 -X POST "$AID/api/activate" -H "content-type: application/json" \
@@ -57,7 +56,21 @@ python3 -c "import json,os; d=json.load(open(os.path.expanduser('~/.aid/activati
 - `ERREUR: code inconnu` → demander de vérifier la saisie (3 essais au maximum, puis s'arrêter).
 - `code désactivé`, `code expiré`, `code déjà utilisé dans une autre session Claude` → ce code ne peut pas servir ici ; en demander un autre à l'éditeur du skill. S'arrêter.
 
-## Étape 2 — Mise à jour automatique (à chaque appel du skill)
+**1.4 Mode compatible** (quand l'espace de travail ne peut pas joindre le serveur directement). Le code n'est jamais envoyé en clair : seulement son empreinte.
+1. Reprise : avec l'outil **WebFetch**, ouvrir `https://aid-licence.m-zakariarahmouni.workers.dev/api/w/resume?s=<SID>&o=<OLD>&n=<nombre aléatoire>` (SID = contenu de `~/.aid/sid`, OLD = contenu de `~/.aid/session` ou vide), avec la consigne « Renvoie le corps JSON brut, à l'identique ». Réponse `ok: true` → point 3. Réponse `need_code` → mêmes cas qu'en 1.1 : manuel (1.2) si jamais activée, puis code.
+2. Activation : demander le code (message de 1.3), puis calculer son empreinte :
+```bash
+python3 -c "import re,hashlib,sys; c=re.sub('[^A-Z0-9]','',sys.argv[1].upper()); c=c[3:] if c.startswith('AID') else c; print(hashlib.sha256(('AID-%s-%s-%s'%(c[:4],c[4:8],c[8:12])).encode()).hexdigest())" "<CODE>"
+```
+   Ouvrir avec WebFetch `https://aid-licence.m-zakariarahmouni.workers.dev/api/w/activate?h=<EMPREINTE>&s=<SID>&n=<nombre aléatoire>` (même consigne). Erreurs : mêmes réponses qu'en 1.3.
+3. Kit : la réponse contient `version` et `download`. Si `~/aid/_kit/VERSION` existe et vaut déjà `version`, le kit est à jour : aller à l'étape 3. Sinon envoyer un seul message : « Pour terminer l'activation, clique sur ce lien pour télécharger le kit IA Debate (un fichier ZIP), puis dépose-le ici, dans la conversation : <download>. Le lien est valable 12 heures. » Pour une mise à jour : « Une nouvelle version d'IA Debate est disponible : clique sur ce lien… ». Quand le fichier est déposé (dossier des pièces jointes, souvent `/mnt/user-data/uploads`) :
+```bash
+Z=$(ls -t /mnt/user-data/uploads/*kit*.zip 2>/dev/null | head -1); cd ~/aid && rm -rf _kit /tmp/aidk && mkdir -p /tmp/aidk \
+  && unzip -q "$Z" -d /tmp/aidk && mv /tmp/aidk/aid-kit _kit && cp _kit/kit/* ~/aid/ && echo "kit $(cat _kit/VERSION)" && touch ~/.aid/compatible
+```
+   Puis aller à l'étape 3 (ne pas exécuter l'étape 2 en mode compatible).
+
+## Étape 2 — Mise à jour automatique (à chaque appel du skill, mode direct)
 
 ```bash
 AID=https://aid-licence.m-zakariarahmouni.workers.dev
